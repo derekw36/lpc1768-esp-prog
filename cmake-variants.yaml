@@ -20,4 +20,4 @@ board:
       short: LPC1768
       settings:
         MBED_TARGET: LPC1768
-        UPLOAD_METHOD: MBED
+        UPLOAD_METHOD: OPENOCD
