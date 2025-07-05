@@ -1,14 +1,9 @@
 #include "mbed.h"
 
-#define ESP_BAUD 9600
-
 BufferedSerial pc(MBED_UARTUSB); // connect to PC over MBED interface
 BufferedSerial esp(MBED_UART2); // connect to ESP UART pins
-DigitalOut rst(p26, 1); // connect to ESP reset pin
-DigitalOut mode(p25, 1); // connect to ESP GPIO0
-
-Thread t1;
-Thread t2;
+DigitalInOut rst(p26, PIN_OUTPUT, OpenDrain, 1); // connect to ESP reset pin
+DigitalInOut mode(p25, PIN_OUTPUT, OpenDrain, 1); // connect to ESP GPIO0
 
 void reset_esp()
 {
@@ -28,7 +23,7 @@ struct uart_passthrough
 {
     FileHandle *in;
     FileHandle *out;
-} pc2esp, esp2pc;
+};
 
 void passthrough(struct uart_passthrough *pt)
 {
@@ -46,14 +41,9 @@ void passthrough(struct uart_passthrough *pt)
 
 int main()
 {
-    // ESP8266 default baud rate is 9600
-    pc.set_baud(ESP_BAUD);
-    esp.set_baud(ESP_BAUD);
-
-    pc2esp.in = &pc;
-    pc2esp.out = &esp;
-    esp2pc.in = &esp;
-    esp2pc.out = &pc;
+    struct uart_passthrough pc2esp = {.in = &pc, .out = &esp};
+    struct uart_passthrough esp2pc = {.in = &esp, .out = &pc};
+    Thread t1, t2;
 
     // Place ESP8266 into flash mode
     flash_mode(true);
